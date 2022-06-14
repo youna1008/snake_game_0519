@@ -1,6 +1,58 @@
 #include "gamehandler.h"
 
-void playing_game()
+static volatile int stop = 0;
+
+void alarm_handler(int sig)
+{
+  stop = 1;
+}
+
+bool moveNtest(WINDOW* board, SNAKE& snake, MAP& map, int& key)
+{
+  snake.SNAKE_move(map, key);
+  bool test = snake.SNAKE_failure(map);
+  snake.SNAKE_insertMAP(map);
+  return test;
+}
+
+void playing_game(WINDOW* board, MAP& map, SNAKE& snake)
+{
+  int key = int(KEY_LEFT);
+  int temp;
+  int fail_test = false;
+
+  stop = 0;
+
+  signal(SIGALRM, alarm_handler);
+  timeout(0.5);
+
+  while(!fail_test)
+  {
+    stop = 0;
+    ualarm(500000, 0);
+
+    while(!stop)
+    {
+      temp = getch();
+      if(temp >= int(KEY_DOWN) && temp <= int(KEY_RIGHT))
+      {
+        key = temp;
+      }
+    }
+    
+    fail_test = moveNtest(board, snake, map, key);
+    if(fail_test == true)
+  {
+    map.MAP_init();
+  }
+    map.MAP_print(board);
+    wrefresh(board);
+  }
+
+  timeout(-1);
+}
+
+void setting_with_playing()
 {
   setlocale(LC_ALL, "");
 
@@ -29,6 +81,9 @@ void playing_game()
   wrefresh(screen_board);
 
   MAP start;
+  SNAKE snake;
+  snake.SNAKE_init(start);
+
   game_board = subwin(screen_board, start.MAP_getMapSize() + 2, start.MAP_getMapSize() + 2, 1, 1);
   wbkgd(game_board, COLOR_PAIR(1));
   wattron(game_board, COLOR_PAIR(1));
@@ -48,11 +103,12 @@ void playing_game()
   wattron(mission_board, COLOR_PAIR(1));
   wborder(mission_board, '|', '|', '-', '-', '+', '+', '+', '+');
   mvwprintw(mission_board, 0, (20 >> 1) - 3, "MISSION");
-  mvwprintw(mission_board, 0, (20 >> 1) - 3, "%s", "\u0444");
   wrefresh(mission_board);
 
   start.MAP_print(game_board);
   wrefresh(game_board);
+
+  playing_game(game_board, start, snake);
   
   getch();
   delwin(game_board);

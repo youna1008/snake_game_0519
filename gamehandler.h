@@ -3,14 +3,19 @@
 
 #include <iostream>
 #include <curses.h>
+#include <unistd.h>
 #include <clocale>
 
 #include "point.h"
 #include "map.h"
+#include "snake.h"
 
 using namespace std;
 #define SCREEN_SIZE 50
 
+void alarm_handler(int sig);
+bool moveNtest(WINDOW* board, SNAKE& snake, MAP& map, int& key);
 void playing_game();
+void setting_with_playing();
 
 #endif
