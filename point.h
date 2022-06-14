@@ -15,6 +15,8 @@ class POINT{
   int POINT_getX() { return x; }
   int POINT_getY() { return y; }
 
+  static POINT POINT_rand(int map_size);
+
   //operators
   POINT& operator=(const POINT& p);
   bool operator==(const POINT& p) const;
