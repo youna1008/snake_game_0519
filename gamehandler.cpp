@@ -7,10 +7,31 @@ void alarm_handler(int sig)
   stop = 1;
 }
 
-bool moveNtest(WINDOW* board, SNAKE& snake, MAP& map, int& key)
+bool moveNtest(WINDOW* board, SNAKE& snake, MAP& map, ITEM* item, int& key)
 {
   snake.SNAKE_move(map, key);
+
+  POINT Shead = snake.SNAKE_getNthPoint(0);
+  
+  int map_val = map.MAP_getValue(Shead);
+
+  switch (map_val)
+  {
+    case Growth :
+      snake.SNAKE_EatItem(map, item);
+      break;
+    case Poison :
+      snake.SNAKE_EatItem(map, item);
+      break;
+  }
+
   bool test = snake.SNAKE_failure(map);
+
+  for(int i = 0; i < 3; i++)
+  {
+    item[i].ITEM_insertMAP(map);
+  }
+
   snake.SNAKE_insertMAP(map);
   return test;
 }
@@ -20,6 +41,8 @@ void playing_game(WINDOW* board, MAP& map, SNAKE& snake)
   int key = int(KEY_LEFT);
   int temp;
   int fail_test = false;
+
+  ITEM item[3];
 
   stop = 0;
 
@@ -31,6 +54,20 @@ void playing_game(WINDOW* board, MAP& map, SNAKE& snake)
     stop = 0;
     ualarm(500000, 0);
 
+    int item_temp = rand() % 10;
+
+    if(item_temp == 1)
+    {
+      for(int i = 0; i < 3; i++)
+      {
+        if (item[i].ITEM_getlifetime() == -1)
+        {
+          item[i].ITEM_create(map);
+          break;
+        }
+      }
+    }
+
     while(!stop)
     {
       temp = getch();
@@ -40,7 +77,17 @@ void playing_game(WINDOW* board, MAP& map, SNAKE& snake)
       }
     }
     
-    fail_test = moveNtest(board, snake, map, key);
+    fail_test = moveNtest(board, snake, map, item, key);
+
+    for(int i = 0; i < 3; i++)
+    {
+      if(item[i].ITEM_getlifetime() >= 0)
+        item[i].ITEM_clock();
+      
+      if(item[i].ITEM_getlifetime() >= 40)
+        item[i].ITEM_delete(map);
+    }
+
     if(fail_test == true)
   {
     map.MAP_init();
@@ -55,6 +102,7 @@ void playing_game(WINDOW* board, MAP& map, SNAKE& snake)
 void setting_with_playing()
 {
   setlocale(LC_ALL, "");
+  srand(time(NULL));
 
   WINDOW* screen_board;
   WINDOW* game_board;
@@ -64,6 +112,7 @@ void setting_with_playing()
   initscr();
   keypad(stdscr, TRUE);
   noecho();
+  curs_set(0);
   resize_term(SCREEN_SIZE, SCREEN_SIZE);
   start_color();
   init_pair(1, COLOR_WHITE, COLOR_BLACK);
