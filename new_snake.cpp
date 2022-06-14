@@ -4,6 +4,6 @@
 
 int main()
 {
-  playing_game();
+  setting_with_playing();
   return 0;
 }
