@@ -64,3 +64,28 @@ void SNAKE::SNAKE_insertMAP(MAP& map)
   }
   map.MAP_set(s[0], Snake_Head);
 }
+
+void SNAKE::SNAKE_EatItem(MAP& map, ITEM* &item) // if item is growth, snake_size++. if item poison, snake_size--
+{
+  POINT temp = s[0];
+  int val = map.MAP_getValue(temp);
+  switch (val)
+  {
+    case Growth :
+      snake_size += 1;
+      break;
+    case Poison :
+      snake_size -= 1;
+      break;
+  }
+
+  int i = 0;
+  for(i = 0; i < 3; i++)
+  {
+    if(item[i].ITEM_getPoint() == s[0])
+    {
+      item[i].ITEM_delete(map);
+      break;
+    }
+  }
+}
