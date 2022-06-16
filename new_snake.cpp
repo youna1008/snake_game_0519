@@ -4,6 +4,6 @@
 
 int main()
 {
-  setting_with_playing();
+  set_and_play();
   return 0;
 }
